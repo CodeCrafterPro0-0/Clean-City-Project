@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clean City</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Clean City Reporter</h1>
+
+        <div class="class">
+            <h2>Report issue</h2>
+
+            <form id="reportForm">
+                <input type="text" id="location" placeholder="Location" required>
+                <button type="button" id="getLocation">Use my location</button>
+
+                <select id="issue" required>
+                    <option value="">Select Issue</option>
+                    <option>Trash Dumping</option>
+                    <option>Public Spitting</option>
+                    <option>Overflow Bin</option>
+                    <option>Plastic Waste</option>
+                </select>
+
+                <textarea id="description" placeholder="Description"></textarea>
+
+                <input type="file" id="photo" accept="image/*" capture="envoronment">
+
+                <button type="submit">Submit Report</button>
+            </form>
+        </div>
+        
+        <h2>City Map</h2>
+        <div id="map"></div>
+
+        <button id="toggleReports">View Reports</button>
+
+        <h3>Total Reports: <span id="count">0</span></h3>
+
+        <div id="reportsSection" class="hidden">
+            <h2>Reports</h2>
+            <div id="reports"></div>
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <script src="/script.js"></script>
+</body>
+</html>
