@@ -1,144 +1,247 @@
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+
+import {
+    getFirestore,
+    collection,
+    addDoc,
+    getDocs,
+    deleteDoc,
+    doc
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyC7Bgx9pwBxz6mdCrNqzeJraDthc486Lqo",
+  authDomain: "cleancity-22780.firebaseapp.com",
+  projectId: "cleancity-22780",
+  storageBucket: "cleancity-22780.firebasestorage.app",
+  messagingSenderId: "986638713214",
+  appId: "1:986638713214:web:53fb0442459812cfa4b32f"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+/* ================= APP ================= */
+
 document.addEventListener("DOMContentLoaded", () => {
-    const form = document.getElementById("reportForm");
-    const reportsDiv = document.getElementById("reports");
-    const toggleBtn = document.getElementById("toggleReports");
-    const reportsSection = document.getElementById("reportsSection");
-    const locationInput = document.getElementById("location");
-    const getLocationBtn = document.getElementById("getLocation");
-    const photoInput = document.getElementById("photo");
-    const countEl = document.getElementById("count");
 
-    /* MAP */
-    const map = L.map("map").setView([26.1445, 91.7362], 13);
+const form = document.getElementById("reportForm");
+const reportsDiv = document.getElementById("reports");
+const toggleBtn = document.getElementById("toggleReports");
+const reportsSection = document.getElementById("reportsSection");
+const locationInput = document.getElementById("location");
+const getLocationBtn = document.getElementById("getLocation");
+const photoInput = document.getElementById("photo");
+const countEl = document.getElementById("count");
+const message = document.getElementById("message");
 
-    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-        attribution: "© OpenStreetMap",
-    }).addTo(map);
 
-    /* Icons */
-    const icons = {
-        "Trash Dumping": L.icon({
-            iconUrl:"https://maps.google.com/mapfiles/ms/icons/red-dot.png",
-            iconSize:[32, 32]
-        }),
-        "Public Spitting": L.icon({
-            iconUrl:"https://maps.google.com/mapfiles/ms/icons/orange-dot.png",
-            iconSize:[32, 32]
-        }),
-        "Overflow Bin": L.icon({
-            iconUrl:"https://maps.google.com/mapfiles/ms/icons/blue-dot.png",
-            iconSize:[32, 32]
-        }),
-        "Plastic Waste": L.icon({
-            iconUrl:"https://maps.google.com/mapfiles/ms/icons/green-dot.png",
-            iconSize:[32, 32]
-        })
-    };
+/* ---------- MESSAGE ---------- */
 
-    /* DATA */
-    let reports = JSON.parse(localStorage.getItem("reports")) || [];
+function showMessage(text){
+  message.innerText = text;
+  message.classList.remove("hidden");
 
-    function updateCounter() {
-        countEl.innerText = reports.length;
+  setTimeout(()=>{
+    message.classList.add("hidden");
+  },3000);
+}
+
+
+/* ---------- MAP ---------- */
+
+const map = L.map("map").setView([26.1445,91.7362],13);
+
+L.tileLayer(
+"https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+{ attribution:"© OpenStreetMap" }
+).addTo(map);
+
+
+/* ---------- ICONS ---------- */
+
+const icons = {
+ "Trash Dumping": L.icon({
+   iconUrl:"https://maps.google.com/mapfiles/ms/icons/red-dot.png",
+   iconSize:[32,32]
+ }),
+
+ "Public Spitting": L.icon({
+   iconUrl:"https://maps.google.com/mapfiles/ms/icons/orange-dot.png",
+   iconSize:[32,32]
+ }),
+
+ "Overflow Bin": L.icon({
+   iconUrl:"https://maps.google.com/mapfiles/ms/icons/blue-dot.png",
+   iconSize:[32,32]
+ }),
+
+ "Plastic Waste": L.icon({
+   iconUrl:"https://maps.google.com/mapfiles/ms/icons/green-dot.png",
+   iconSize:[32,32]
+ })
+};
+
+
+/* ---------- COUNTER ---------- */
+
+function updateCounter(count){
+  countEl.innerText = count;
+}
+
+
+/* ---------- LOAD REPORTS ---------- */
+
+async function loadReports(){
+
+  reportsDiv.innerHTML = "";
+
+  // remove previous markers
+  map.eachLayer(layer=>{
+    if(layer instanceof L.Marker){
+      map.removeLayer(layer);
+    }
+  });
+
+  const querySnapshot =
+    await getDocs(collection(db,"reports"));
+
+  let count = 0;
+
+  querySnapshot.forEach(docSnap=>{
+
+    const report = docSnap.data();
+    const id = docSnap.id;
+
+    const div = document.createElement("div");
+    div.className = "report";
+
+    div.innerHTML = `
+      <strong>📍 ${report.location}</strong><br>
+      Issue: ${report.issue}<br>
+      ${report.description || ""}
+      <br>
+      <button onclick="deleteReport('${id}')">
+        Delete
+      </button>
+    `;
+
+    reportsDiv.appendChild(div);
+
+    if(report.location.includes(",")){
+      const [lat,lon] = report.location.split(",");
+
+      L.marker([lat,lon],{
+        icon: icons[report.issue]
+      }).addTo(map);
     }
 
-    function displayReports() {
-        reportsDiv.innerHTML = "";
-        
-        map.eachLayer(layer => {
-            if (layer instanceof L.Marker) {
-                map.removeLayer(layer);
-            }
-        });
+    count++;
+  });
 
-    reports.forEach(report => {
+  updateCounter(count);
+}
 
-        const div = document.createElement("div");
-        div.className = "report";
 
-        div.innerHTML = `
-        <strong>📍 ${report.location}</strong><br>
-        Issue: ${report.issue}<br>
-        ${report.description || ""}
-        `;
+/* ---------- GPS LOCATION ---------- */
 
-        reportsDiv.appendChild(div);
+getLocationBtn.addEventListener("click",()=>{
 
-        // add map marker
-        if (report.location.includes(",")) {
-            const [lat, lon] = report.location.split(",");
+  getLocationBtn.innerText="Getting Location...";
+  getLocationBtn.disabled=true;
 
-            L.marker([lat, lon], {
-                icon: icons[report.issue]
-            })
-                .addTo(map)
-                .bindPopup(`<b>${report.issue}</b><br>${report.description || ""}`);
-            }
-        });
+  navigator.geolocation.getCurrentPosition(
 
-        updateCounter();
+    pos=>{
+      const lat=pos.coords.latitude.toFixed(5);
+      const lon=pos.coords.longitude.toFixed(5);
+
+      locationInput.value=`${lat},${lon}`;
+      map.setView([lat,lon],16);
+
+      getLocationBtn.innerText="Use My Location";
+      getLocationBtn.disabled=false;
+    },
+
+    err=>{
+      alert(err.message);
+      getLocationBtn.innerText="Use My Location";
+      getLocationBtn.disabled=false;
     }
-    
-    displayReports();
 
-    /* GPS LOCATION */
-    getLocationBtn.addEventListener("click", () => {
-        if (navigator.geolocation) {
-            navigator.geolocation.getCurrentPosition(pos => {
-
-                const lat = pos.coords.latitude.toFixed(5);
-                const lon = pos.coords.longitude.toFixed(5);
-
-                locationInput.value = `${lat},${lon}`;
-            });
-        } else {
-            alert("Geolocation not supported");
-    }
+  );
 });
 
-    /* SUBMIT */
-    form.addEventListener("submit", e => {
-        e.preventDefault();
 
-        const location = locationInput.value;
-        const issue = document.getElementById("issue").value;
-        const description = document.getElementById("description").value;
+/* ---------- SUBMIT REPORT ---------- */
 
-        let photo = null;
+form.addEventListener("submit",e=>{
+  e.preventDefault();
 
-        if (photoInput.files[0]) {
-            const reader = new FileReader();
+  const location = locationInput.value;
+  const issue = document.getElementById("issue").value;
+  const description = document.getElementById("description").value;
 
-            reader.onload = function () {
-                photo = reader.result;
-                saveReport(location, issue, description, photo);
-            };
+  let photo = null;
 
-            reader.readAsDataURL(photoInput.files[0]);
-        } else {
-            saveReport(location, issue, description, null);
-        }
-    });
+  if(photoInput.files[0]){
+    const reader = new FileReader();
 
-    function saveReport(location, issue, description, photo) {
+    reader.onload = ()=>{
+      photo = reader.result;
+      saveReport(location,issue,description,photo);
+    };
 
-        const report = { location, issue, description, photo };
+    reader.readAsDataURL(photoInput.files[0]);
+  }else{
+    saveReport(location,issue,description,null);
+  }
+});
 
-        reports.push(report);
 
-        localStorage.setItem("reports", JSON.stringify(reports));
+async function saveReport(location,issue,description,photo){
 
-        form.reset();
-        displayReports();
-    }
+  await addDoc(collection(db,"reports"),{
+    location,
+    issue,
+    description,
+    photo,
+    created: Date.now()
+  });
 
-    /* TOGGLE REPORTS */
-    toggleBtn.addEventListener("click", () => {
-        reportsSection.classList.toggle("hidden");
+  form.reset();
+  showMessage("✅ Report submitted successfully");
 
-        toggleBtn.innerText =
-            reportsSection.classList.contains("hidden")
-                ? "View Reports"
-                : "Hide Reports";
-    });
+  loadReports();
+}
+
+
+/* ---------- DELETE REPORT ---------- */
+
+window.deleteReport = async function(id){
+
+  await deleteDoc(doc(db,"reports",id));
+
+  showMessage("🗑️ Report deleted");
+
+  loadReports();
+};
+
+
+/* ---------- TOGGLE REPORTS ---------- */
+
+toggleBtn.addEventListener("click",()=>{
+  reportsSection.classList.toggle("hidden");
+
+  toggleBtn.innerText =
+    reportsSection.classList.contains("hidden")
+      ? "View Reports"
+      : "Hide Reports";
+});
+
+
+/* ---------- INITIAL LOAD ---------- */
+
+loadReports();
+
 });
