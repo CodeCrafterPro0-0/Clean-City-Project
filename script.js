@@ -10,12 +10,12 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyC7Bgx9pwBxz6mdCrNqzeJraDthc486Lqo",
-  authDomain: "cleancity-22780.firebaseapp.com",
-  projectId: "cleancity-22780",
-  storageBucket: "cleancity-22780.firebasestorage.app",
-  messagingSenderId: "986638713214",
-  appId: "1:986638713214:web:53fb0442459812cfa4b32f"
+  apiKey: "",
+  authDomain: "",
+  projectId: "",
+  storageBucket: "",
+  messagingSenderId: "",
+  appId: ""
 };
 
 const app = initializeApp(firebaseConfig);
