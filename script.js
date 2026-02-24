@@ -6,7 +6,8 @@ import {
     addDoc,
     getDocs,
     deleteDoc,
-    doc
+    doc,
+    onSnapshot
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 const firebaseConfig = {
@@ -92,39 +93,38 @@ function updateCounter(count){
 
 /* ---------- LOAD REPORTS ---------- */
 
-async function loadReports(){
+async function listenReports(){
 
-  reportsDiv.innerHTML = "";
+  const reportsRef = collection(db, "reports");
 
-  // remove previous markers
-  map.eachLayer(layer=>{
-    if(layer instanceof L.Marker){
-      map.removeLayer(layer);
-    }
-  });
+    onSnapshot(reportsRef, (snapshot) => {
+      reportsDiv.innerHTML = "";
 
-  const querySnapshot =
-    await getDocs(collection(db,"reports"));
+      map.eachLayer(layer=>{
+        if(layer instanceof L.Marker){
+          map.removeLayer(layer);
+        }
+      });
 
-  let count = 0;
+      let count = 0;
 
-  querySnapshot.forEach(docSnap=>{
+    snapshot.forEach(docSnap=>{
 
-    const report = docSnap.data();
-    const id = docSnap.id;
+      const report = docSnap.data();
+      const id = docSnap.id;
 
-    const div = document.createElement("div");
-    div.className = "report";
+      const div = document.createElement("div");
+            div.className = "report";
 
-    div.innerHTML = `
-      <strong>📍 ${report.location}</strong><br>
-      Issue: ${report.issue}<br>
-      ${report.description || ""}
-      <br>
-      <button onclick="deleteReport('${id}')">
-        Delete
-      </button>
-    `;
+            div.innerHTML = `
+              <strong>📍 ${report.location}</strong><br>
+              Issue: ${report.issue}<br>
+              ${report.description || ""}
+              <br>
+              <button onclick="deleteReport('${id}')">
+              Delete
+              </button>
+            `;
 
     reportsDiv.appendChild(div);
 
@@ -140,6 +140,7 @@ async function loadReports(){
   });
 
   updateCounter(count);
+  });
 }
 
 
@@ -211,8 +212,6 @@ async function saveReport(location,issue,description,photo){
 
   form.reset();
   showMessage("✅ Report submitted successfully");
-
-  loadReports();
 }
 
 
@@ -223,8 +222,6 @@ window.deleteReport = async function(id){
   await deleteDoc(doc(db,"reports",id));
 
   showMessage("🗑️ Report deleted");
-
-  loadReports();
 };
 
 
@@ -242,6 +239,6 @@ toggleBtn.addEventListener("click",()=>{
 
 /* ---------- INITIAL LOAD ---------- */
 
-loadReports();
+listenReports();
 
 });
