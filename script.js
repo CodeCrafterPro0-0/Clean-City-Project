@@ -10,6 +10,15 @@ import {
     onSnapshot
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
+/* Login */
+import {
+  getAuth,
+  signInWithPopup,
+  GoogleAuthProvider,
+  signOut,
+  onAuthStateChanged
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase_suth.js";
+
 const firebaseConfig = {
   apiKey: "AIzaSyC7Bgx9pwBxz6mdCrNqzeJraDthc486Lqo",
   authDomain: "cleancity-22780.firebaseapp.com",
@@ -21,6 +30,9 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
+
+const auth = getAuth(app);
+const provider = new GoogleAuthProvider();
 
 /* ================= APP ================= */
 
@@ -36,6 +48,10 @@ const photoInput = document.getElementById("photo");
 const countEl = document.getElementById("count");
 const message = document.getElementById("message");
 
+/*login */
+const loginBtn = document.getElementById("loginBtn");
+const logoutBtn = document.getElementById("logoutBtn");
+const userInfo = document.getElementById("userInfo");
 
 /* ---------- MESSAGE ---------- */
 
@@ -143,6 +159,34 @@ async function listenReports(){
   });
 }
 
+logoutBtn.addEventListener("click", async() => {
+  await signInWithPopup(auth, provider);
+});
+
+logoutBtn.addEventListener("click", async() => {
+  await signOut(auth);
+});
+
+/*loged users*/
+let currentUser = null;
+onAuthStateChanged(auth, user => {
+  if (user){
+    currentUser = user;
+
+    userInfo.innerText=`Logged in as ${user.displayName}`;
+
+    loginBtn.classList.add("hidden");
+
+    logoutBtn.classList.remove("hidden");
+  } else {
+    currentUser = null;
+
+    userInfo.innerText = "";
+
+    loginBtn.classList.remove("hidden");
+    logoutBtn.classList.add("hidden");
+  }
+});
 
 /* ---------- GPS LOCATION ---------- */
 
@@ -207,6 +251,7 @@ async function saveReport(location,issue,description,photo){
     issue,
     description,
     photo,
+    user: currentUser.email,
     created: Date.now()
   });
 
