@@ -19,14 +19,12 @@ import {
   GoogleAuthProvider,
   signOut,
   onAuthStateChanged
-<<<<<<< HEAD
 } from
 "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
 
 =======
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
->>>>>>> 2fccdd7e5c45c151580db8ed17f0ce2d9a80ed21
 
 const firebaseConfig = {
   apiKey: "AIzaSyC7Bgx9pwBxz6mdCrNqzeJraDthc486Lqo",
