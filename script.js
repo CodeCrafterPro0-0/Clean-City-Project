@@ -278,6 +278,17 @@ form.addEventListener("submit",e=>{
 
 async function saveReport(location,issue,description,photo){
 
+  const lastReport = localStorage.getItem("lastReport");
+
+  if (lastReport){
+    const diff = Date.now() - Number(lastReport);
+
+    if (diff < 120000){
+      showMessage("⌛ Please wait before reporting again");
+      return;
+    }
+  }
+
   await addDoc(collection(db,"reports"),{
     location,
     issue,
