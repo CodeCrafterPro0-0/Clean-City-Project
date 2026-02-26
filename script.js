@@ -298,6 +298,8 @@ async function saveReport(location,issue,description,photo){
     created:Date.now()
   });
 
+  localStorage.setItem("lastReport", Date.now());
+
   form.reset();
   showMessage("✅ Report submitted successfully");
 }
