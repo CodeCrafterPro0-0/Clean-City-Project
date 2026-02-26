@@ -56,6 +56,7 @@ const message = document.getElementById("message");
 const loginBtn = document.getElementById("loginBtn");
 const logoutBtn = document.getElementById("logoutBtn");
 const userInfo = document.getElementById("userInfo");
+const adminEmail1 = "alaxenine@gmail.com";
 
 
 /* ---------- MESSAGE ---------- */
@@ -141,7 +142,7 @@ function listenReports(){
         ${report.description || ""}
         <br>
         ${
-          currentUser && currentUser.email===report.user
+          currentUser?.email=== adminEmail1
             ? `<button onclick="deleteReport('${id}')">Delete</button>`
             : ""
         }
@@ -191,7 +192,9 @@ onAuthStateChanged(auth,user=>{
   if(user){
     currentUser=user;
 
-    userInfo.innerText=`Logged in as ${user.displayName}`;
+    const isAdmin = user.email === adminEmail1;
+
+    userInfo.innerText=`Logged in as ${user.displayName}` + (isAdmin ? "👑 Admin" : "");
 
     loginBtn.classList.add("hidden");
     logoutBtn.classList.remove("hidden");
