@@ -76,9 +76,10 @@ function showMessage(text){
 const map = L.map("map").setView([26.1445,91.7362],13);
 
 L.tileLayer(
-"https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
-{ attribution:"© OpenStreetMap" }
-).addTo(map);
+"https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png",
+{
+  attribution:"© OpenStreetMap © CARTO"
+}).addTo(map);
 
 
 /* ---------- ICONS ---------- */

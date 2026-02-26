@@ -8,7 +8,10 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div id="maintanance" class="1">
+    <div id="maintenanceScreen" class="hidden">
+        <h1>🚧 Clean City Under Maintenance</h1>
+        <p>We are improving the city experience.</p>
+    </div>
     <div class="container">
         <h1>Clean City Reporter</h1>
 
@@ -34,7 +37,7 @@
 
                 <textarea id="description" placeholder="Description"></textarea>
 
-                <input type="file" id="photo" accept="image/*" capture="envoronment">
+                <input type="file" id="photo" accept="image/*" capture="environment">
 
                 <button type="submit">Submit Report</button>
             </form>
@@ -52,7 +55,6 @@
             <div id="reports"></div>
         </div>
     </div>
-        </div>
 
     <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
     <script type="module" src="script.js"></script>
