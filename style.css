@@ -172,7 +172,7 @@ button[type="submit"]:hover{
     height:420px;
     border-radius:14px;
     margin-top:10px;
-    border:1px solid #30363d;
+    border:2px solid #30363d;
     overflow:hidden;
 }
 
@@ -198,12 +198,17 @@ h3{
     height:100vh;
     background:#0d1117;
     color:white;
-    display:flex;
-    flex-direction:column;
+    display:none;
     justify-content:center;
     align-items:center;
+    flex-direction:column;
     text-align:center;
     z-index:9999;
+}
+
+/* when active */
+#maintenanceScreen.active{
+    display:flex;
 }
 
 #maintenanceScreen h1{
